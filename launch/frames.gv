@@ -1,0 +1,13 @@
+digraph G {
+"kinect2_link" -> "kinect2_rgb_optical_frame"[label="Broadcaster: /kinect2\nAverage rate: 98.901 Hz\nMost recent transform: 1610011887.133 ( 0.001 sec old)\nBuffer length: 4.975 sec\n"];
+"base_link" -> "kinect2_link"[label="Broadcaster: /static_transform_publisher_1610011878111542824\nAverage rate: 10.192 Hz\nMost recent transform: 1610011887.174 ( -0.040 sec old)\nBuffer length: 4.906 sec\n"];
+"kinect2_rgb_optical_frame" -> "kinect2_ir_optical_frame"[label="Broadcaster: /kinect2\nAverage rate: 98.901 Hz\nMost recent transform: 1610011887.133 ( 0.001 sec old)\nBuffer length: 4.975 sec\n"];
+"base_footprint" -> "base_link"[label="Broadcaster: /base_footprint_to_base_link\nAverage rate: 10.189 Hz\nMost recent transform: 1610011887.205 ( -0.071 sec old)\nBuffer length: 4.907 sec\n"];
+"odom" -> "base_footprint"[label="Broadcaster: /ekf_localization\nAverage rate: 47.109 Hz\nMost recent transform: 1610011887.109 ( 0.025 sec old)\nBuffer length: 4.946 sec\n"];
+"map" -> "odom"[label="Broadcaster: /rtabmap/rtabmap\nAverage rate: 20.202 Hz\nMost recent transform: 1610011887.224 ( -0.090 sec old)\nBuffer length: 4.950 sec\n"];
+"base_footprint" -> "imu_link"[label="Broadcaster: /base_footprint_to_imu_link\nAverage rate: 10.190 Hz\nMost recent transform: 1610011887.218 ( -0.084 sec old)\nBuffer length: 4.907 sec\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1610011887.134"[ shape=plaintext ] ;
+ }->"map";
+}

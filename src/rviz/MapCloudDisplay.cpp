@@ -255,6 +255,10 @@ void MapCloudDisplay::onInitialize()
 	updateBillboardSize();
 	updateAlpha();
 
+	ros::NodeHandle nh;
+	cloudPub_ = nh.advertise<rtabmap_ros::Cloud>("cloud_new", 1);
+	cloudPosePub_ = nh.advertise<rtabmap_ros::CloudPose>("cloud_pose_new", 1);
+
 	spinner_.start();
 }
 
@@ -691,6 +695,46 @@ void MapCloudDisplay::update( float wall_dt, float ros_dt )
 				cloud_infos_.erase(it->first);
 				cloud_infos_.insert(*it);
 				lastCloudAdded = it->first;
+
+				std::vector<rtabmap_ros::Point> points;
+				for(std::vector<rviz::PointCloud::Point>::iterator it = cloud_info->transformed_points_.begin(); it != cloud_info->transformed_points_.end(); ++it){
+					uint32_t RGBA = it->color.getAsRGBA();
+					uint8_t R = RGBA >> 24; 
+					uint8_t G = RGBA >> 16; 
+					uint8_t B = RGBA >> 8; 
+					uint8_t A = RGBA; 
+
+
+					rtabmap_ros::Point pt;
+					pt.x = it->position.x;
+					pt.y = it->position.y; 
+					pt.z = it->position.z; 
+					pt.R = R; 
+					pt.G = G; 
+					pt.B = B; 
+
+					
+					points.push_back(pt);
+
+					// cloud_data.push_back();
+					// cloud_data.push_back(it->position.y); 
+					// cloud_data.push_back(it->position.z);
+					// cloud_data.push_back(it->color.r);
+					// cloud_data.push_back(it->color.g);
+					// cloud_data.push_back(it->color.b);			
+					
+					
+					// ROS_INFO("%d", it->color.getAsRGBA());
+					// ROS_INFO("%d", R);
+					// ROS_INFO("%d", G);
+					// ROS_INFO("%d", B);
+					// ROS_INFO("**************************\nx: %f\ny: %f\nz: %f\n R: %f\n G: %f\nB: %f\n **************************", it->position.x, it->position.y, it->position.z, R, G, B);
+					
+				}
+				rtabmap_ros::CloudPtr msg(new rtabmap_ros::Cloud);
+				msg->data = points;
+				msg->mapId = cloud_info->id_;
+				cloudPub_.publish(msg);
 			}
 
 			new_cloud_infos_.clear();
@@ -756,6 +800,68 @@ void MapCloudDisplay::update( float wall_dt, float ros_dt )
 						cloudInfoIt->second->scene_node_->setOrientation(poseOrientation);
 						cloudInfoIt->second->scene_node_->setVisible(true);
 						++totalNodesShown;
+
+
+						int size = cloudInfoIt->second->transformed_points_.size(); 
+						std::vector<rtabmap_ros::Point> points;
+						int data_index = 0;
+
+						// for(std::vector<rviz::PointCloud::Point>::iterator it = cloudInfoIt->second->transformed_points_.begin(); it != cloudInfoIt->second->transformed_points_.end(); ++it){
+						// 	uint32_t RGBA = it->color.getAsRGBA();
+						// 	uint8_t R = RGBA >> 24; 
+						// 	uint8_t G = RGBA >> 16; 
+						// 	uint8_t B = RGBA >> 8; 
+						// 	uint8_t A = RGBA; 
+
+
+						// 	rtabmap_ros::Point pt;
+						// 	pt.x = it->position.x;
+						// 	pt.y = it->position.y; 
+						// 	pt.z = it->position.z; 
+						// 	pt.R = R; 
+						// 	pt.G = G; 
+						// 	pt.B = B; 
+
+						 
+						// 	points.push_back(pt);
+
+						// 	// cloud_data.push_back();
+						// 	// cloud_data.push_back(it->position.y); 
+						// 	// cloud_data.push_back(it->position.z);
+						// 	// cloud_data.push_back(it->color.r);
+						// 	// cloud_data.push_back(it->color.g);
+						// 	// cloud_data.push_back(it->color.b);			
+							
+							
+						// 	// ROS_INFO("%d", it->color.getAsRGBA());
+						// 	// ROS_INFO("%d", R);
+						// 	// ROS_INFO("%d", G);
+						// 	// ROS_INFO("%d", B);
+						// 	// ROS_INFO("**************************\nx: %f\ny: %f\nz: %f\n R: %f\n G: %f\nB: %f\n **************************", it->position.x, it->position.y, it->position.z, R, G, B);
+						// 	++data_index;
+						// }
+				
+				
+						std::vector<double> transformVector; 
+						 
+						transformVector.push_back(posePosition.x);
+						transformVector.push_back(posePosition.y); 
+						transformVector.push_back(posePosition.z); 
+						
+
+						std::vector<double> orientationVector; 
+						orientationVector.push_back(poseOrientation.w);
+						orientationVector.push_back(poseOrientation.x); 
+						orientationVector.push_back(poseOrientation.y); 
+						orientationVector.push_back(poseOrientation.z);
+						
+						//NODELET_INFO("Sending RtabmapInfo msg (last_id=%d)...", stat.refImageId());
+						rtabmap_ros::CloudPosePtr msg(new rtabmap_ros::CloudPose);
+					 	msg->rotationMatrix = orientationVector; 
+						msg->transformMatrix = transformVector; 
+						// msg->data = points;
+						msg->mapId = cloudInfoIt->second->id_;
+						cloudPosePub_.publish(msg);
 					}
 					else
 					{

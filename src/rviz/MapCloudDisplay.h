@@ -35,6 +35,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 #include <rtabmap_ros/MapData.h>
+#include <rtabmap_ros/Cloud.h>
+#include <rtabmap_ros/CloudPose.h>
 #include <rtabmap/core/Transform.h>
 
 #include <pluginlib/class_loader.h>
@@ -165,6 +167,8 @@ private:
 private:
 	ros::AsyncSpinner spinner_;
 	ros::CallbackQueue cbqueue_;
+	ros::Publisher cloudPub_;
+	ros::Publisher cloudPosePub_;
 
 	std::map<int, CloudInfoPtr> cloud_infos_;
 
